@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Our Memories</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Georgia', serif;
+      height: 100%;
+      background: #000;
+    }
+
+    body.blur-start .background {
+      filter: blur(10px);
+      opacity: 0.4;
+      transition: filter 1s ease, opacity 1s ease;
+    }
+
+    body.blur-end .background {
+      filter: blur(0px);
+      opacity: 1;
+    }
+
+    .background {
+      background-image: url('background.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      min-height: 100vh;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      color: #222;
+    }
+
+    h1, h2 {
+      color: white;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
+    }
+
+    h1 {
+      margin-top: 30px;
+      font-size: 2rem;
+    }
+
+    h2 {
+      font-size: 1rem;
+      margin-bottom: 20px;
+    }
+
+    #book-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    #book-container.hidden {
+      display: none;
+    }
+
+    #book {
+      display: flex;
+      width: 90%;
+      max-width: 900px;
+      background: white;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .page {
+      flex: 1;
+      padding: 20px;
+      height: 400px;
+      overflow-y: auto;
+      transition: all 0.4s ease-in-out;
+    }
+
+    .left {
+      border-right: 1px solid #ddd;
+      background-color: #fdfdfd;
+    }
+
+    .right {
+      border-left: 1px solid #ddd;
+      background-image: linear-gradient(to bottom, white 95%, #f3f3f3 100%);
+      background-size: 100% 2em;
+      background-repeat: repeat-y;
+      padding-left: 40px;
+      position: relative;
+    }
+
+    .right::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 20px;
+      width: 1px;
+      height: 100%;
+      background: pink;
+    }
+
+    .controls {
+      margin: 20px;
+      text-align: center;
+      color: #fff;
+    }
+
+    .controls button {
+      background-color: #fff;
+      color: #d946ef;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.2s ease;
+    }
+
+    .controls button:hover {
+      background-color: #f3e8ff;
+    }
+
+    .control-buttons {
+      display: flex;
+      gap: 10px;
+      margin: 10px auto 20px;
+      justify-content: center;
+    }
+
+    .audio-controls, .view-controls {
+      text-align: center;
+    }
+
+    .audio-controls button, .view-controls button {
+      background-color: #fff;
+      color: #d946ef;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.2s ease;
+      display: flex;
+      align-items: center;
+      margin: 0 auto;
+    }
+
+    .audio-controls button svg, .view-controls button svg {
+      margin-right: 8px;
+    }
+
+    .audio-controls button:hover, .view-controls button:hover {
+      background-color: #f3e8ff;
+    }
+
+    .controls span {
+      font-size: 1rem;
+      margin: 0 10px;
+    }
+
+    .fade-out-left, .fade-out-right {
+      opacity: 0;
+      transform: translateX(-50px);
+    }
+
+    .fade-in {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .page img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    .caption {
+      margin-top: 10px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      #book {
+        flex-direction: column;
+        height: auto;
+      }
+
+      .page {
+        height: auto;
+      }
+
+      .right {
+        padding-left: 20px;
+      }
+
+      .right::before {
+        left: 10px;
+      }
+    }
+  </style>
+</head>
+<body class="blur-start">
+  <div class="background">
+    <h1>Our Memories</h1>
+    <h2>A journey through our special moments</h2>
+
+    <audio id="backgroundMusic" loop>
+      <source src="GIVĒON_TWENTIES.mp3" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+
+    <div class="control-buttons">
+      <div class="audio-controls">
+        <button id="playPauseBtn" onclick="togglePlay()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Play Music
+        </button>
+      </div>
+
+      <div class="view-controls">
+        <button id="toggleViewBtn" onclick="toggleBookView()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          Hide Book
+        </button>
+      </div>
+    </div>
+
+    <div id="book-container">
+      <div id="book">
+        <div class="page left" id="page-left"></div>
+        <div class="page right" id="page-right"></div>
+      </div>
+      <div class="controls">
+        <button onclick="prevPage()">← Previous</button>
+        <span id="page-count">Page 1 of 0</span>
+        <button onclick="nextPage()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const pages = [{
+        left: `<img src="little zul.jpg" alt="Дурсамж 1"><div class="caption"> 2025.05.16 00:00 Таны өдөр эхэлж байна...</div>`,
+        right: "Ийм хөөрхөн доохон тэр хацар, хамар гээд нуль эгдүү аааа ааа хазаад хаячмаар хөөрхөн🥹😍. Ийм хөөрхөн чамдаа төрсөн өдрийн мэндийг дахин дахин хүргэе🫸🏻💐🫂. Үргэлж инээмсэглэж, аз жаргалаар бялхаж яваасай гэж дандаа хүсдэг шүү. Цаанаа л нэг гоё энергитэй, сүнс нь маш гоё хүндээ аливаа юмнаас гоё сайхныг харж байгаа нүд нь маш гоё, Зүгээр байгаа байдлаас нь л урлаг, мэдрэмж мэдрэгддэг зөндөөгийн зөндөө гоё хүн шүү чи!!!🫶"
+      },
+      {
+        left: `<img src="huurhunzul.jpg" alt="Дурсамж 5"><div class="caption">Та бэлэн үү???</div>`,
+        right: "Одоо ийм мундаг том болчихсон... Мундаг, хичээнгүй, хөдөлмөрч, ухаалаг, цагаахан, зөндөө олон гоё авьяастай, маш гоё дууны мэдрэмжтэй, авсан зургууд нь хүртэл мэдрэмж нь өөр түвшнийх гээд 🫠. Би л энд ингэж их бахархаж байгаа юм чинь ийм мундаг охиноороо аав ээж нь маш их бахархаж явдаг байхдаа... Ингээд хамраа зангидаад инээж байгаа чинь маш хөөрхөн болохоор энэ зургийг сонгочихлоо🥹"
+      },
+      {
+        left: `<img src="anhni_zurag.jpg" alt="Дурсамж 1"><div class="caption">Дурсамж 1</div>`,
+        right: "Зиа ингээд жижкэн жижкэн дурсамжуудаараа аялъя...🚂 Аааа энэ анх над руу зурж явуулсан зураг ёстой хөөрхөн🥹 "
+      },
+      {
+        left: `<img src="goyain.jpg" alt="Дурсамж 2"><div class="caption">Дурсамж 2</div>`,
+        right: "Миний зурсан зургийг дандаа магтаж байдагт нь маш их баярлаж маш их урам авч өөртөө итгэлтэй болдог шүү.🫂"
+      },
+      {
+        left: `<img src="lovesong.jpg" alt="Дурсамж 3"><div class="caption">Дурсамж 3</div>`,
+        right: "Энэ дуунд бүр донтож билээ хаха Өдөрт бараг 10 удаа сонсоод л.🫠"
+      },
+      {
+        left: `<img src="huzuu.jpg" alt="Дурсамж 4"><div class="caption">Дурсамж 4</div>`,
+        right: "Диплом гээд өдөржин шөнөжин суухад ингээд дэм өгөөд хүч өгдөг байсан тулдаа л би давж гарсан гэж боддог шүү.🫸🏻🫂"
+      },
+      {
+        left: `<img src="palylsit.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 5</div>`,
+        right: "Энэ 2 playlist ч янзтай шүү 🎶🫠. Хэзээ ч сонссон уйдахгүй. Peace & Quiet сонсож байхад төвлөрөл дээд цэгтээ гээд ккк гараас ажил гарах шиг л болж байгаа юм чинь."
+      },
+      {
+        left: `<img src="zuraghuurhun.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 6</div>`,
+        right: "Хар бараан зургаасаа бага багаар салаад л өнгө будаг ашиглаж зураг зурж эхлээд амтанд нь орж байгааг анзаараад гоё үг хэлж улам их урам өгөөд их гоё хүн шүү бүр баярлаад баярлаад ханашгүй тийм гоё нандин хүн дээ🫂🤭."
+      },
+      {
+        left: `<img src="nai;s.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 7</div>`,
+        right: "Маш гоё гар💅🫶. Мянган гаран дундаас би андахгүй гээдахгүюү 😝. Хумсны өнгө нь бүр дандаа л гоё өнгөтэй байдаг сайхан гартай шүү."
+      },
+      {
+        left: `<img src="tenger.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 8</div>`,
+        right: "Жаргаж буй нарны туяаны өнгөний сайхныг харчихвал тэр өдөр гоё гээд аль болох гоё өнгөтэй тэнгэр харуулах гээл цаг харж байгаад л гарж зураг авч харуулах гээл, Зуны сайхан зүйлсийн нэг яах аргагүй жаргаж байгаа нарны нил ягаан, улаан, улбар өнгий нийллэг бол төгс төгс 🫠🫠  "
+      },
+      {
+        left: `<img src="charger.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 9</div>`,
+        right: "Дуртай зүйлсийнх нь нэг Зуны цастай уулс ⛰️⛰️."
+      },
+      {
+        left: `<img src="charger2.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 10</div>`,
+        right: "aikhaikhaikh энэ үгийг уншихаар нэг тийм гулжганаж хэвтээд өмөлзмөөр санагдаад байдгийн🫠🫠🫠."
+      },
+      {
+        left: `<img src="snap zul.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 11</div>`,
+        right: "Ниээ энэ өөрийгөө зурсан нь хүртэл ийм хөөрхөн тэр үс, малгай, хацрын хонхорхой нтр нь ёстой хөөрхөөөн 😍🤭 "
+      },
+      {
+        left: `<img src="drinw ater.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 12</div>`,
+        right: "Ус сайн уугаарай гээд хэлсэн чинь ->"
+      },
+      {
+        left: `<img src="got water.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 13</div>`,
+        right: "Ингээд ус бариад явж байгаагаа харуулаад хөөрхөн хүн шүү ёстой 🫸🏻🫂"
+      },
+      {
+        left: `<img src="tenegr2.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 14</div>`,
+        right: "Би диплом гээд гарж тэнгэр харж чадахгүй үед намайг хараг гээд авч явуулаад миний сүнс цадах шиг л болоод л бүтээмж суга өсөөд л аая 💪🤭 ",
+      },
+      {
+        left: `<img src="selfie1.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 15</div>`,
+        right: "Ёооооё тэр нүдийг нь эээээ 🫠🫠🫠"
+      },
+      {
+        left: `<img src="nelsuh mind.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 16</div>`,
+        right: "Тэмцээнд орж байхад нь ёстой онлайнаар дэмжээд л. Миний толгойнд Зулаа 🤸🤸🤸 байнга аэробик хийж хийж байгаа юм чинь. "
+      },
+      {
+        left: `<img src="silevr dmeal.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 17</div>`,
+        right: "Хөвсгөл явж тэмцээнд амжилттай оролцоод ёстой мундаг. Зөндөө бахархал төрж байсан шүү🫂🫂. Ирээд Вьетнам руу яваад л. Тамирчны амьдрал ч чанга юм байна лээ шүү. 😮‍💨😮‍💨🫂"
+      },
+      {
+        left: `<img src="reward.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 18</div>`,
+        right: "Цастай уул зураад харуулсан чинь ийм зураг ирээд дахиад зөндөө уул зурмаар урам авч билээ."
+      },
+      {
+        left: `<img src="our heart shape.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 19</div>`,
+        right: "Аааааа энэ зүрх ёстой хөөрхөөн 🫠 ядраад харьж байгаа ч заавал алхаж хармаар санагдаад л. Улаан байдаг сураг сонсоод хар шөнө мөнгөө гээсэн хүн шиг л газар шагайж 2, 3 шөнө явж билээ. Энэ зургийг ёстой гялс чиггг гэл дарсандаа хаха. Энэ цэнхэр нь их дэлгүүрээс Peace mall дунд байдаг байсан одоо арилчихсан байна лээ."
+      },
+      {
+        left: `<img src="our heart shape2.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 20</div>`,
+        right: "Энэ цагаан маань Computer land ийн урд таксины зогсоол дээр байдаг байсан. Одоо бас арилчихсан байна лээ. Хөөрхөн зүрхнүүд шүүү.😮‍💨😮‍💨🫂 "
+      },
+      {
+        left: `<img src="red nail.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 21</div>`,
+        right: "Энэ улаан хумс бүр хайлж урсмаар час улаан өнгө гэдэг нь үү гэмээр улаан өнгөнд амиа тавьдаг би бараг муужирмаар өнгө гээд хаха 😝😝 "
+      },
+      {
+        left: `<img src="mandat.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 22</div>`,
+        right: "Яаааа монголоо төлөөлөөд тэмцээнд яваад, би энд лайв үзээд дэмжээстэй аймар хөөрхөн камерт гарахаараа даллаад л инээгээд хацар дээрээ 🫶 ингээд л ёстой хөөрхөн гэрэл цацруулаад инээгээд 🙂‍↔️🥹🫠 "
+      },
+      {
+        left: `<img src="top fan mongol gymnast.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 23</div>`,
+        right: "Шинэ пост орохоор нь Зиа зулаа хаана байна гээд хайгаад л байсан Монголын гимнастикийн холбооны TOP FAN гээд😝."
+      },
+      {
+        left: `<img src="top fan vietnam.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 24</div>`,
+        right: "Лайв үзсээр байгаад Вьетнамын гимнастикийн холбооны TOP FAN 😝😝"
+      },
+      {
+        left: `<img src="6 sariin tsas.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 25</div>`,
+        right: "6 Сард цас ороод жижкээн юм хийгээд газраас чулуу чүдэнз олж амь оруулаад бараг Olaf гээдахгүюу  хахааха 😜 "
+      },
+      {
+        left: `<img src="hairtai oosor.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 26</div>`,
+        right: "Ёоо энэ ёстой гоё оосор шүү өнгө нь аягүү хөөрхөн.🥹🙂‍↔️ " 
+      },
+      {
+        left: `<img src="gift.jpg" alt="Дурсамж 5"><div class="caption">Дурсамж 27</div>`,
+        right: "•^_^•"
+      },
+      ];
+
+    let currentPage = 0;
+    const backgroundMusic = document.getElementById('backgroundMusic');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const bookContainer = document.getElementById('book-container');
+    const toggleViewBtn = document.getElementById('toggleViewBtn');
+    let isBookVisible = true;
+
+    function togglePlay() {
+      if (backgroundMusic.paused) {
+        backgroundMusic.play();
+        playPauseBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="6" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="4" height="16"></rect>
+          </svg>
+          Pause Music
+        `;
+      } else {
+        backgroundMusic.pause();
+        playPauseBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Play Music
+        `;
+      }
+    }
+
+    function animatePageChange(direction) {
+      const leftPage = document.getElementById("page-left");
+      const rightPage = document.getElementById("page-right");
+
+      const fadeOutClass = direction === "next" ? "fade-out-left" : "fade-out-right";
+      leftPage.classList.add(fadeOutClass);
+      rightPage.classList.add(fadeOutClass);
+
+      setTimeout(() => {
+        if (pages.length > 0) {
+          const page = pages[currentPage];
+          leftPage.innerHTML = page.left;
+          rightPage.textContent = page.right;
+        } else {
+          leftPage.innerHTML = '';
+          rightPage.textContent = '';
+        }
+
+        leftPage.classList.remove(fadeOutClass);
+        rightPage.classList.remove(fadeOutClass);
+
+        leftPage.classList.add("fade-in");
+        rightPage.classList.add("fade-in");
+
+        setTimeout(() => {
+          leftPage.classList.remove("fade-in");
+          rightPage.classList.remove("fade-in");
+        }, 500);
+
+        document.getElementById("page-count").textContent = `Page ${currentPage + 1} of ${pages.length}`;
+      }, 300);
+    }
+
+    function nextPage() {
+      if (currentPage < pages.length - 1) {
+        currentPage++;
+        animatePageChange("next");
+      }
+    }
+
+    function prevPage() {
+      if (currentPage > 0) {
+        currentPage--;
+        animatePageChange("prev");
+      }
+    }
+
+    function toggleBookView() {
+      if (isBookVisible) {
+        bookContainer.classList.add('hidden');
+        toggleViewBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          Show Book
+        `;
+      } else {
+        bookContainer.classList.remove('hidden');
+        toggleViewBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          Hide Book
+        `;
+      }
+      isBookVisible = !isBookVisible;
+    }
+
+    window.onload = () => {
+      const leftPage = document.getElementById("page-left");
+      const rightPage = document.getElementById("page-right");
+      const pageCount = document.getElementById("page-count");
+
+      if (pages.length > 0) {
+        leftPage.innerHTML = pages[currentPage].left;
+        rightPage.textContent = pages[currentPage].right;
+        pageCount.textContent = `Page ${currentPage + 1} of ${pages.length}`;
+      } else {
+        leftPage.innerHTML = '';
+        rightPage.textContent = '';
+        pageCount.textContent = `Page ${currentPage + 1} of ${pages.length}`;
+      }
+    };
+
+    // Blur transition to focus on load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.body.classList.remove('blur-start');
+        document.body.classList.add('blur-end');
+      }, 100);
+    });
+  </script>
+</body>
+</html>
